@@ -1727,13 +1727,9 @@
 .score-bar-team { display: flex; align-items: center; gap: 8px; height: 26px; font-size: 14px; }
 .score-bar-logo { width: 23px; height: 23px; object-fit: contain; }
 .score-bar-team b { margin-left: auto; font-size: 17px; }
-.score-bar-controls { display: flex; align-items: center; gap: 4px; }
-.score-bar-controls button { border: 1px solid var(--grey2); background: var(--white); color: var(--black); border-radius: 4px; padding: 7px 9px; min-height: 36px; cursor: pointer; font: inherit; font-size: 12px; }
-.score-bar-controls button:hover, .score-bar-controls button:focus-visible { border-color: var(--teal); background: var(--grey1); }
 @media (max-width: 640px) {
   .score-bar-inner { flex-wrap: wrap; padding: 0 12px; gap: 0; }
   .score-bar-heading { flex: 1; padding: 10px 0 6px; }
-  .score-bar-controls { order: 1; }
   .score-bar-viewport { order: 2; flex: 0 0 100%; }
   .score-bar-card { width: 166px; flex-basis: 166px; padding: 8px 12px; }
 }
@@ -1810,11 +1806,6 @@
     <div class="score-bar-heading"><strong>Latest Game Night</strong><span id="score-bar-date"></span></div>
     <div class="score-bar-viewport" id="score-bar-viewport" tabindex="0" aria-label="Game scores; scroll to browse">
       <div class="score-bar-track" id="score-bar-track"></div>
-    </div>
-    <div class="score-bar-controls">
-      <button type="button" id="score-bar-prev" aria-label="Previous scores">&#8249;</button>
-      <button type="button" id="score-bar-pause" aria-pressed="false" aria-label="Pause automatic score scrolling">Pause</button>
-      <button type="button" id="score-bar-next" aria-label="Next scores">&#8250;</button>
     </div>
   </div>
 </section>
@@ -6699,9 +6690,7 @@ function scoreMatchupBoxRows(data, matchId) {
   const bar = document.getElementById('latest-score-bar');
   const viewport = document.getElementById('score-bar-viewport');
   const track = document.getElementById('score-bar-track');
-  const pauseButton = document.getElementById('score-bar-pause');
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let paused = reducedMotion.matches, hovering = false, busy = false;
+  let hovering = false, touching = false, busy = false;
   let signature = '', displayedSheet = '', group = null, loopWidth = 0, position = 0, lastFrame = 0;
   const matchup = document.getElementById('score-matchup');
   const matchupContent = document.getElementById('score-matchup-content');
@@ -6824,12 +6813,6 @@ function scoreMatchupBoxRows(data, matchId) {
   }
 
 
-  function setPaused(value) {
-    paused = value;
-    pauseButton.textContent = paused ? 'Play' : 'Pause';
-    pauseButton.setAttribute('aria-pressed', String(paused));
-    pauseButton.setAttribute('aria-label', paused ? 'Resume automatic score scrolling' : 'Pause automatic score scrolling');
-  }
   function resizeTrack() {
     if (!group) return;
     track.querySelector('[data-score-copy]')?.remove();
@@ -6922,24 +6905,18 @@ function scoreMatchupBoxRows(data, matchId) {
   function animate(time) {
     const elapsed = Math.min(time - lastFrame, 50);
     lastFrame = time;
-    if (loopWidth && !matchup.open && !bar.hidden && !paused && !hovering && !document.hidden && !viewport.contains(document.activeElement)) {
+    if (loopWidth && !matchup.open && !bar.hidden && !hovering && !touching && !document.hidden) {
       position = (position + elapsed * .025) % loopWidth;
       viewport.scrollLeft = position;
     } else { position = viewport.scrollLeft; }
     requestAnimationFrame(animate);
   }
-  pauseButton.addEventListener('click', () => setPaused(!paused));
-  for (const [id, direction] of [['score-bar-prev', -1], ['score-bar-next', 1]]) {
-    document.getElementById(id).addEventListener('click', () => {
-      setPaused(true);
-      viewport.scrollBy({ left: direction * 184, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
-    });
-  }
-  viewport.addEventListener('pointerdown', () => setPaused(true));
-  viewport.addEventListener('wheel', () => setPaused(true), { passive: true });
-  viewport.addEventListener('keydown', () => setPaused(true));
-  bar.addEventListener('mouseenter', () => { hovering = true; });
-  bar.addEventListener('mouseleave', () => { hovering = false; });
+  // Pause only during interaction; never leave the ticker permanently stopped after a click.
+  bar.addEventListener('pointerenter', event => { if (event.pointerType === 'mouse') hovering = true; });
+  bar.addEventListener('pointerleave', event => { if (event.pointerType === 'mouse') hovering = false; });
+  viewport.addEventListener('pointerdown', event => { if (event.pointerType !== 'mouse') touching = true; });
+  window.addEventListener('pointerup', () => { touching = false; });
+  window.addEventListener('pointercancel', () => { touching = false; });
   track.addEventListener('click', event => {
     const card = event.target.closest('a[data-match-id]');
     if (!card) return;
@@ -6947,13 +6924,11 @@ function scoreMatchupBoxRows(data, matchId) {
     const game = scoreGames(scoreLogSnapshot).find(item => item.id === card.dataset.matchId && item.phase === card.dataset.phase);
     if (game) openMatchup(game, card);
   });
-  reducedMotion.addEventListener('change', () => setPaused(reducedMotion.matches));
   new ResizeObserver(resizeTrack).observe(viewport);
   document.addEventListener('change', event => {
     if (event.target.matches('.website-season-select')) { if (matchup.open) matchup.close(); refresh(); }
   });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
-  setPaused(paused);
   refresh();
   setInterval(refresh, 120000);
   requestAnimationFrame(animate);
