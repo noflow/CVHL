@@ -1698,6 +1698,32 @@
       grid-template-columns: 1fr;
     }
   }
+/* Latest posted game night */
+.score-bar { background: var(--white); border-bottom: 3px solid var(--gold); }
+.score-bar[hidden] { display: none; }
+.score-bar-inner { max-width: 1440px; margin: auto; display: flex; align-items: stretch; padding: 0 20px; gap: 16px; }
+.score-bar-heading { flex: 0 0 155px; display: flex; justify-content: center; flex-direction: column; gap: 4px; padding: 12px 0; }
+.score-bar-heading strong { font: 700 19px 'Barlow Condensed', sans-serif; text-transform: uppercase; color: var(--teal); }
+.score-bar-heading span { font-size: 12px; color: var(--black); }
+.score-bar-viewport { flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--grey2) transparent; }
+.score-bar-track, .score-bar-group { display: flex; width: max-content; }
+.score-bar-card { display: block; flex: 0 0 184px; width: 184px; border-left: 1px solid var(--grey2); padding: 10px 15px; color: var(--black); text-decoration: none; }
+.score-bar-card:hover, .score-bar-card:focus-visible { background: var(--grey1); outline: 2px solid var(--gold); outline-offset: -2px; }
+.score-bar-status { display: block; font-size: 10px; font-weight: 700; color: var(--grey3); letter-spacing: .6px; margin-bottom: 5px; }
+.score-bar-team { display: flex; align-items: center; gap: 8px; height: 26px; font-size: 14px; }
+.score-bar-logo { width: 23px; height: 23px; object-fit: contain; }
+.score-bar-team b { margin-left: auto; font-size: 17px; }
+.score-bar-controls { display: flex; align-items: center; gap: 4px; }
+.score-bar-controls button { border: 1px solid var(--grey2); background: var(--white); color: var(--black); border-radius: 4px; padding: 7px 9px; min-height: 36px; cursor: pointer; font: inherit; font-size: 12px; }
+.score-bar-controls button:hover, .score-bar-controls button:focus-visible { border-color: var(--teal); background: var(--grey1); }
+@media (max-width: 640px) {
+  .score-bar-inner { flex-wrap: wrap; padding: 0 12px; gap: 0; }
+  .score-bar-heading { flex: 1; padding: 10px 0 6px; }
+  .score-bar-controls { order: 1; }
+  .score-bar-viewport { order: 2; flex: 0 0 100%; }
+  .score-bar-card { width: 166px; flex-basis: 166px; padding: 8px 12px; }
+}
+
 </style>
 </head>
 <body>
@@ -1721,6 +1747,21 @@
   </a>
   <button class="mobile-menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" onclick="toggleMobileMenu(event)">&#9776;</button>
 </header>
+
+<section class="score-bar" id="latest-score-bar" aria-label="Latest game night results" hidden>
+  <div class="score-bar-inner">
+    <div class="score-bar-heading"><strong>Latest Game Night</strong><span id="score-bar-date"></span></div>
+    <div class="score-bar-viewport" id="score-bar-viewport" tabindex="0" aria-label="Game scores; scroll to browse">
+      <div class="score-bar-track" id="score-bar-track"></div>
+    </div>
+    <div class="score-bar-controls">
+      <button type="button" id="score-bar-prev" aria-label="Previous scores">&#8249;</button>
+      <button type="button" id="score-bar-pause" aria-pressed="false" aria-label="Pause automatic score scrolling">Pause</button>
+      <button type="button" id="score-bar-next" aria-label="Next scores">&#8250;</button>
+    </div>
+  </div>
+</section>
+
 
 <main>
 
@@ -6445,5 +6486,196 @@ initSite();
     <div class="box-body" id="box-body"></div>
   </div>
 </div>
+
+<script>
+// BEGIN latest-score-data
+function scoreNightDate(value) {
+  const text = String(value || '').trim();
+  let match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T]|$)/);
+  if (!match) {
+    const us = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T]|$)/);
+    if (us) match = [us[0], us[3], us[1], us[2]];
+  }
+  if (!match) return '';
+  const [, y, m, d] = match.map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  if (date.getUTCFullYear() !== y || date.getUTCMonth() !== m - 1 || date.getUTCDate() !== d) return '';
+  // Use the game date written by the league, never the visitor's timezone or upload date.
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+function latestScoreNight(logs) {
+  const games = new Map();
+  for (const { data, phase } of logs) {
+    const idx = Object.fromEntries(data.cols.map((c, i) => [String(c).trim(), i]));
+    for (const row of data.rows) {
+      const get = key => String(row[idx[key]] ?? '').trim();
+      const date = scoreNightDate(get('Date'));
+      const team1 = get('Team 1'), team2 = get('Team 2');
+      let score1 = get('Team 1 Score'), score2 = get('Team 2 Score');
+      const result1 = get('Team 1 Result').toLowerCase(), result2 = get('Team 2 Result').toLowerCase();
+      const forfeit = /forfeit/i.test(get('Stitched Match IDs')) ||
+        (typeof isForfeitGameRow === 'function' && isForfeitGameRow(row, idx)) ||
+        (typeof isForfeitMatchId === 'function' && isForfeitMatchId(get('Match ID')));
+      if (forfeit) {
+        if (result1 === 'win' && result2 === 'loss') { score1 ||= '1'; score2 ||= '0'; }
+        if (result2 === 'win' && result1 === 'loss') { score1 ||= '0'; score2 ||= '1'; }
+      }
+      if (!date || !team1 || !team2 || !/^\d+$/.test(score1) || !/^\d+$/.test(score2)) continue;
+      // Blank/unplayed fixtures and 0-0 placeholders must never replace posted results.
+      if (Number(score1) === Number(score2)) continue;
+      const id = get('Match ID') || `${date}|${team1}|${team2}|${get('Date')}`;
+      // A missing optional tab can fall back to the regular log; never show a game twice.
+      if (games.has(id) && games.get(id).phase !== phase) continue;
+      games.set(id, { id, phase, date, time: get('Date'), team1, team2,
+        score1: Number(score1), score2: Number(score2), forfeit,
+        overtime: /^(yes|true|1)$/i.test(get('OT')) });
+    }
+  }
+  const date = [...games.values()].reduce((latest, game) => game.date > latest ? game.date : latest, '');
+  return { date, games: [...games.values()].filter(game => game.date === date)
+    .sort((a, b) => a.time.localeCompare(b.time) || a.id.localeCompare(b.id)) };
+}
+// END latest-score-data
+
+(() => {
+  const bar = document.getElementById('latest-score-bar');
+  const viewport = document.getElementById('score-bar-viewport');
+  const track = document.getElementById('score-bar-track');
+  const pauseButton = document.getElementById('score-bar-pause');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let paused = reducedMotion.matches, hovering = false, busy = false;
+  let signature = '', displayedSheet = '', group = null, loopWidth = 0, position = 0, lastFrame = 0;
+
+  function setPaused(value) {
+    paused = value;
+    pauseButton.textContent = paused ? 'Play' : 'Pause';
+    pauseButton.setAttribute('aria-pressed', String(paused));
+    pauseButton.setAttribute('aria-label', paused ? 'Resume automatic score scrolling' : 'Pause automatic score scrolling');
+  }
+  function resizeTrack() {
+    if (!group) return;
+    track.querySelector('[data-score-copy]')?.remove();
+    loopWidth = group.scrollWidth > viewport.clientWidth ? group.scrollWidth : 0;
+    if (loopWidth) {
+      const copy = group.cloneNode(true);
+      copy.dataset.scoreCopy = 'true';
+      copy.setAttribute('aria-hidden', 'true');
+      copy.querySelectorAll('a').forEach(link => link.tabIndex = -1);
+      track.appendChild(copy);
+    }
+    position = viewport.scrollLeft = 0;
+  }
+  function render(night) {
+    bar.hidden = !night.games.length;
+    if (bar.hidden) { track.replaceChildren(); group = null; loopWidth = 0; return; }
+    document.getElementById('score-bar-date').textContent = new Date(night.date + 'T12:00:00Z')
+      .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+    group = document.createElement('div');
+    group.className = 'score-bar-group';
+    night.games.forEach(game => {
+      const card = document.createElement('a');
+      card.className = 'score-bar-card';
+      card.href = '#games';
+      card.setAttribute('aria-label', `${displayTeamName(game.team1)} ${game.score1}, ${displayTeamName(game.team2)} ${game.score2}. View recent games.`);
+      const status = document.createElement('span');
+      status.className = 'score-bar-status';
+      status.textContent = `${game.phase === 'playoffs' ? 'PLAYOFFS Â· ' : ''}FINAL${game.forfeit ? ' Â· FORFEIT' : game.overtime ? ' / OT' : ''}`;
+      card.appendChild(status);
+      [[game.team1, game.score1], [game.team2, game.score2]].forEach(([name, score]) => {
+        const line = document.createElement('span');
+        line.className = 'score-bar-team';
+        const logo = document.createElement('span');
+        logo.innerHTML = teamLogoImg(name, 'score-bar-logo', '');
+        const label = document.createElement('span');
+        label.textContent = nameToAbbr(name);
+        label.title = displayTeamName(name);
+        const result = document.createElement('b');
+        result.textContent = score;
+        line.append(logo, label, result);
+        card.appendChild(line);
+      });
+      group.appendChild(card);
+    });
+    track.replaceChildren(group);
+    resizeTrack();
+  }
+  async function readLog(sheet, tab, optional = false) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheet)}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(tab)}&cb=${Date.now()}`;
+      const response = await fetch(url, { signal: controller.signal });
+      if (optional && (response.status === 400 || response.status === 404)) return { cols: [], rows: [] };
+      if (!response.ok) throw new Error(`Scores unavailable (${response.status})`);
+      const rows = parseCSV(await response.text());
+      const cols = (rows.shift() || []).map(value => String(value).trim());
+      if (!['Date', 'Team 1', 'Team 2', 'Team 1 Score', 'Team 2 Score'].every(col => cols.includes(col))) {
+        // Google can return the first worksheet when an optional tab does not exist.
+        if (optional) return { cols: [], rows: [] };
+        throw new Error('Game log columns are unavailable');
+      }
+      return { cols, rows };
+    } finally { clearTimeout(timeout); }
+  }
+  async function refresh() {
+    if (busy || document.hidden) return;
+    const sheet = sourceSheetIdForSelectedSeason();
+    if (sheet !== displayedSheet) { signature = ''; displayedSheet = sheet; bar.hidden = true; }
+    if (!sheet) return;
+    busy = true;
+    try {
+      const [regular, playoffs] = await Promise.all([readLog(sheet, 'Game Log'), readLog(sheet, 'Playoff Game Log', true)]);
+      if (sheet !== sourceSheetIdForSelectedSeason()) return;
+      const night = latestScoreNight([{ data: regular, phase: 'regular' }, { data: playoffs, phase: 'playoffs' }]);
+      const next = JSON.stringify(night);
+      if (next !== signature) { render(night); signature = next; }
+    } catch (error) {
+      // Preserve the last successful scores through a temporary Sheets outage.
+      console.warn('Latest game night scores could not refresh.', error);
+    } finally {
+      busy = false;
+      if (sheet !== sourceSheetIdForSelectedSeason()) refresh();
+    }
+  }
+  function animate(time) {
+    const elapsed = Math.min(time - lastFrame, 50);
+    lastFrame = time;
+    if (loopWidth && !bar.hidden && !paused && !hovering && !document.hidden && !viewport.contains(document.activeElement)) {
+      position = (position + elapsed * .025) % loopWidth;
+      viewport.scrollLeft = position;
+    } else { position = viewport.scrollLeft; }
+    requestAnimationFrame(animate);
+  }
+  pauseButton.addEventListener('click', () => setPaused(!paused));
+  for (const [id, direction] of [['score-bar-prev', -1], ['score-bar-next', 1]]) {
+    document.getElementById(id).addEventListener('click', () => {
+      setPaused(true);
+      viewport.scrollBy({ left: direction * 184, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+    });
+  }
+  viewport.addEventListener('pointerdown', () => setPaused(true));
+  viewport.addEventListener('wheel', () => setPaused(true), { passive: true });
+  viewport.addEventListener('keydown', () => setPaused(true));
+  bar.addEventListener('mouseenter', () => { hovering = true; });
+  bar.addEventListener('mouseleave', () => { hovering = false; });
+  track.addEventListener('click', event => {
+    if (!event.target.closest('a')) return;
+    event.preventDefault();
+    showPage('games', document.querySelector('nav button[onclick*="\'games\'"]'));
+  });
+  reducedMotion.addEventListener('change', () => setPaused(reducedMotion.matches));
+  new ResizeObserver(resizeTrack).observe(viewport);
+  document.addEventListener('change', event => {
+    if (event.target.matches('.website-season-select')) refresh();
+  });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  setPaused(paused);
+  refresh();
+  setInterval(refresh, 120000);
+  requestAnimationFrame(animate);
+})();
+
+</script>
 </body>
 </html>
