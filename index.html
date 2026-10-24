@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tape To Tape Hockey League Stats</title>
+<title>Continental Virtual Hockey League Stats</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --teal:    #101310;
-    --teal2:   #2b302c;
-    --teal3:   #e6f7d5;
-    --ice:     #f4f6f3;
+    --teal:    #1a5276;
+    --teal2:   #366c8e;
+    --teal3:   #d6eaf8;
+    --ice:     #f0f7ff;
     --white:   #ffffff;
-    --grey1:   #eef1ed;
-    --grey2:   #cbd2ca;
-    --grey3:   #667068;
-    --black:   #101310;
-    --accent:  #d43b32;
-    --gold:    #7ded00;
+    --grey1:   #f2f3f4;
+    --grey2:   #d5d8dc;
+    --grey3:   #888888;
+    --black:   #111111;
+    --accent:  #e74c3c;
+    --gold:    #f39c12;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -38,8 +38,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    border-bottom: 3px solid var(--gold);
-    box-shadow: 0 3px 14px rgba(0,0,0,0.32);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
   }
   .logo {
     font-family: 'Barlow Condensed', sans-serif;
@@ -54,12 +53,11 @@
   }
   .logo span { color: var(--gold); }
   .league-logo {
-    width: 42px;
-    height: 42px;
-    object-fit: cover;
-    object-position: left center;
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
     flex: 0 0 auto;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
   }
   nav {
     display: flex;
@@ -81,8 +79,8 @@
     white-space: nowrap;
     transition: background 0.15s, color 0.15s;
   }
-  nav button:hover { background: rgba(125,237,0,0.12); color: #fff; }
-  nav button.active { background: var(--gold); color: var(--black); }
+  nav button:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  nav button.active { background: rgba(255,255,255,0.18); color: #fff; }
   .mobile-menu-toggle {
     display: none;
     margin-left: auto;
@@ -358,7 +356,6 @@
   .home-hero {
     background: linear-gradient(135deg, var(--teal), var(--teal2));
     color: #fff;
-    border-top: 3px solid var(--gold);
     border-radius: 8px;
     padding: 24px;
     box-shadow: 0 4px 22px rgba(0,0,0,0.14);
@@ -673,8 +670,6 @@
     padding: 24px;
     color: var(--grey3);
     font-size: 12px;
-    line-height: 1.4;
-    overflow-wrap: anywhere;
     margin-top: 40px;
   }
 
@@ -810,7 +805,7 @@
   .player-split-btn.active {
     background: var(--teal3);
     border-color: var(--teal);
-    box-shadow: inset 0 0 0 1px rgba(16,19,16,0.12);
+    box-shadow: inset 0 0 0 1px rgba(26,82,118,0.12);
   }
   .player-split-logo {
     width: 24px;
@@ -981,7 +976,7 @@
     border: 1px solid var(--grey2);
   }
   .stat-box.highlight { background: var(--teal3); border-color: var(--teal); }
-  .stat-box.advanced  { background: #f2fde7; border-color: var(--gold); }
+  .stat-box.advanced  { background: #fef9f0; border-color: #f39c12; }
   .stat-val {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 26px;
@@ -1023,7 +1018,7 @@
     max-width: 100%;
     overflow: hidden;
   }
-  .game-card:hover { border-color: var(--gold); box-shadow: 0 4px 20px rgba(16,19,16,0.16); }
+  .game-card:hover { border-color: var(--teal); box-shadow: 0 4px 20px rgba(26,82,118,0.15); }
   .game-date {
     font-size: 11px;
     color: var(--grey3);
@@ -1119,7 +1114,7 @@
     letter-spacing: 0.5px;
     font-size: 11px;
   }
-  .badge.ot   { background: #f2fde7; color: #3f7800; }
+  .badge.ot   { background: #fef9f0; color: var(--gold); }
   .badge.lgot { background: #fdf2f2; color: var(--accent); }
   .badge.forfeit { background: #111; color: #fff; }
   .game-arrow {
@@ -1137,28 +1132,22 @@
   @media (max-width: 640px) {
     header {
       height: 58px;
-      padding: 0 108px 0 12px;
+      padding: 0 12px;
       gap: 10px;
     }
     .logo {
       font-size: 22px;
     }
     .league-logo {
-      width: 36px;
-      height: 36px;
+      width: 26px;
+      height: 26px;
     }
     .mobile-menu-toggle {
       display: inline-flex;
-      position: absolute;
-      top: 10px;
-      right: 12px;
       margin-left: 0;
     }
     .discord-nav-link.is-visible {
-      position: absolute;
-      top: 10px;
-      right: 58px;
-      margin-left: 0;
+      margin-left: auto;
     }
     nav {
       display: none;
@@ -1185,8 +1174,8 @@
       border-radius: 5px;
     }
     nav button.active {
-      background: var(--gold);
-      color: var(--black);
+      background: rgba(255,255,255,0.22);
+      color: #fff;
     }
     .controls {
       top: 58px;
@@ -1479,7 +1468,7 @@
 
   /* PLAYOFF BRACKET */
   .bracket-stage {
-    background: radial-gradient(circle at center, rgba(255,255,255,0.18), rgba(16,19,16,0.96));
+    background: radial-gradient(circle at center, rgba(255,255,255,0.16), rgba(26,82,118,0.92));
     border-radius: 8px;
     padding: 22px;
     color: #fff;
@@ -1789,7 +1778,7 @@
 <body>
 
 <header>
-  <div class="logo"><img class="league-logo" src="images/TTHL%20Logo.png" alt="TTHL">TTHL <span>HOCKEY</span></div>
+  <div class="logo"><img class="league-logo" src="images/NHL%20Logo.png" alt="">CVHL <span>HOCKEY</span></div>
   <nav id="main-nav">
     <button class="active" onclick="showPage('home', this)">Home</button>
     <button onclick="showPage('standings', this)">Standings</button>
@@ -1976,17 +1965,17 @@
 
 </main>
 
-<footer>Tape To Tape Hockey League Stats -- Updated automatically each game night</footer>
+<footer>Continental Virtual Hockey League Stats -- Updated automatically each game night</footer>
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 // Your publish sheet ID — the one stats_publisher.py writes to
-const SHEET_ID = "13n_hXuLrKQPfbYYb0CRzwXIw1Ve7xiU7JtvCDyz-YBY"; // publish sheet
+const SHEET_ID = "1BkumsptWbv0FJdku8PcwlYFfA2Sh7rV9uVQvPbMWwwM"; // publish sheet
 const PLAYOFF_SHEET_ID = ""; // optional separate playoff publish sheet
-const SOURCE_SHEET_ID = "1uGcv2iJvE-dvT26DWLuYnA6Md3rGHr4QaMREjGBI1MA"; // scraper sheet (Game/Skater/Goalie Log)
-const SCHEDULE_SHEET_ID = "1JkrBVL1DNWN1E79Ka7WkgInfyz6zoUddlpl_fXKfJts"; // schedule sheet
-const SITE_LEAGUE_NAME = "Tape To Tape Hockey League";
-const DISCORD_INVITE_URL = "https://discord.gg/2vWk6MyyBA"; // optional discord.gg or discord.com/invite link
+const SOURCE_SHEET_ID = "1WtRzxmnKRgff7OJVIHFQoKMq2BW_SuR0B5GTPYx9oak"; // scraper sheet (Game/Skater/Goalie Log)
+const SCHEDULE_SHEET_ID = "1dZOFDB6siAPnhDIfDbpZLXG9DXQIJ5TIADLrTd4oeQc"; // schedule sheet
+const SITE_LEAGUE_NAME = "Continental Virtual Hockey League";
+const DISCORD_INVITE_URL = ""; // optional discord.gg or discord.com/invite link
 const WEBSITE_SEASONS_TAB = "Website Seasons";
 let playoffRuntimeSettings = {};
 let playoffStatsEnabled = false;
@@ -1996,38 +1985,57 @@ let selectedWebsiteSeasonId = "current";
 
 const DIVISIONS = {
   "EAST": [
+    "BOS",
     "BUF",
     "DET",
-    "VGK",
-    "PIT"
+    "NYR"
   ],
   "WEST": [
-    "CGY",
+    "DAL",
     "LAK",
-    "VAN",
-    "ANA"
+    "SEA",
+    "UTA"
   ]
 };
 
 const TEAMS = [
   {
+    "abbr": "BOS",
+    "name": "Boston Bruins",
+    "logo": "Boston Bruins.png",
+    "keywords": [
+      "cvhl boston bruins",
+      "cvhl",
+      "boston",
+      "bruins",
+      "boston bruins",
+      "bos"
+    ]
+  },
+  {
     "abbr": "BUF",
     "name": "Buffalo Sabres",
     "logo": "Buffalo Sabres.png",
     "keywords": [
-      "tthl buffalo sabres",
+      "cvhl buffalo sabres",
+      "cvhl",
+      "buffalo",
+      "sabres",
       "buffalo sabres",
       "buf"
     ]
   },
   {
-    "abbr": "CGY",
-    "name": "Calgary Flames",
-    "logo": "Calgary Flames.png",
+    "abbr": "DAL",
+    "name": "Dallas Stars",
+    "logo": "Dallas Stars.png",
     "keywords": [
-      "tthl calgary flames",
-      "calgary flames",
-      "cgy"
+      "cvhl dallas stars",
+      "cvhl",
+      "dallas",
+      "stars",
+      "dallas stars",
+      "dal"
     ]
   },
   {
@@ -2035,19 +2043,13 @@ const TEAMS = [
     "name": "Detroit Red Wings",
     "logo": "Detroit Red Wings.png",
     "keywords": [
-      "tthl detroit red wings",
+      "cvhl detroit red wings",
+      "cvhl",
+      "detroit",
+      "red",
+      "wings",
       "detroit red wings",
       "det"
-    ]
-  },
-  {
-    "abbr": "VGK",
-    "name": "Vegas Golden Knights",
-    "logo": "Vegas Golden Knights.png",
-    "keywords": [
-      "tthl vegas golden knights",
-      "vegas golden knights",
-      "vgk"
     ]
   },
   {
@@ -2055,52 +2057,66 @@ const TEAMS = [
     "name": "LA Kings",
     "logo": "Los Angeles Kings.png",
     "keywords": [
-      "tthl los angeles kings",
+      "cvhl los angeles kings",
+      "cvhl",
+      "los",
+      "angeles",
+      "kings",
       "la kings",
       "lak"
     ]
   },
   {
-    "abbr": "PIT",
-    "name": "Pittsburgh Penguins",
-    "logo": "Pittsburgh Penguins.png",
+    "abbr": "NYR",
+    "name": "New York Rangers",
+    "logo": "New York Rangers.png",
     "keywords": [
-      "tthl penguins",
-      "pittsburgh penguins",
-      "pit"
+      "cvhl new york rangers",
+      "cvhl",
+      "new",
+      "york",
+      "rangers",
+      "new york rangers",
+      "nyr"
     ]
   },
   {
-    "abbr": "VAN",
-    "name": "Vancouver Canucks",
-    "logo": "vancouver canucks.png",
+    "abbr": "SEA",
+    "name": "Seattle Kraken",
+    "logo": "Seattle Kraken.png",
     "keywords": [
-      "tthl vancouver canucks",
-      "vancouver canucks",
-      "van"
+      "cvhl seattle kraken",
+      "cvhl",
+      "seattle",
+      "kraken",
+      "seattle kraken",
+      "sea"
     ]
   },
   {
-    "abbr": "ANA",
-    "name": "Anaheim Ducks",
-    "logo": "Anaheim Ducks.png",
+    "abbr": "UTA",
+    "name": "Utah Mammoth",
+    "logo": "Utah Mammoth.png",
     "keywords": [
-      "tthl anaheim ducks",
-      "anaheim ducks",
-      "ana"
+      "cvhl utah mammoth",
+      "cvhl",
+      "utah",
+      "mammoth",
+      "utah mammoth",
+      "uta"
     ]
   }
 ];
 
 const ROSTER_SHEET_TAB = "Roster";
-const ROSTER_SHEET_ID = "1WN3T1ilRUnk5a95RyE4dorlPWqMsUpV70SS6N_Q4dWc";
-const ROSTER_LAYOUT = "tthl";
+const ROSTER_SHEET_ID = "1GqYg1fZ4q5NtHxiS5wqA89iqYxAhX5xqYDKKEjQn9PY";
+const ROSTER_LAYOUT = "standard";
 const LEGACY_ROSTER_SHEET_TABS = ["CWHL Season 2 Roster", "Season Roster"];
 const ROSTER_BLOCK_BASES = [0, 9, 18, 27];
 const TEAM_SALARY_CAP = 73000000;
 const BANNED_QUIT_TAB = "Banned & Quit";
 const TEAM_NAME_PREFIXES = [
-  "TTHL"
+  "CVHL"
 ];
 
 // ── SHEET FETCH ───────────────────────────────────────────────────────────────
@@ -2376,9 +2392,9 @@ function configureDiscordLink(value) {
 async function loadHomeSettings() {
   if (homeSettings) return homeSettings;
   const fallback = {
-    home_title: "TTHL",
-    home_subtitle: "Tape To Tape Hockey League stats, standings, schedules, and playoff tracking.",
-    league_intro: "Welcome to the Tape To Tape Hockey League hub. Follow the current season, league leaders, team standings, player stats, goalie stats, schedules, recent games, and playoff race in one place.",
+    home_title: "CVHL",
+    home_subtitle: "Continental Virtual Hockey League stats, standings, schedules, and playoff tracking.",
+    league_intro: "Welcome to the Continental Virtual Hockey League hub. Follow the current season, league leaders, team standings, player stats, goalie stats, schedules, recent games, and playoff race in one place.",
     season_label: "Current Season",
     season_dates: "Set in Website Settings",
     discord_invite_url: DISCORD_INVITE_URL
@@ -4813,67 +4829,94 @@ function gameDateCellHtml(timeOnly, phase) {
 
 // Full team name lookup from abbreviation (for display)
 const ABBR_TO_FULL = {
+  "BOS": "Boston Bruins",
   "BUF": "Buffalo Sabres",
-  "CGY": "Calgary Flames",
+  "DAL": "Dallas Stars",
   "DET": "Detroit Red Wings",
-  "VGK": "Vegas Golden Knights",
   "LAK": "LA Kings",
-  "PIT": "Pittsburgh Penguins",
-  "VAN": "Vancouver Canucks",
-  "ANA": "Anaheim Ducks"
+  "NYR": "New York Rangers",
+  "SEA": "Seattle Kraken",
+  "UTA": "Utah Mammoth"
 };
 
 const TEAM_LOGO_FILES = {
+  "BOS": "Boston Bruins.png",
   "BUF": "Buffalo Sabres.png",
-  "CGY": "Calgary Flames.png",
+  "DAL": "Dallas Stars.png",
   "DET": "Detroit Red Wings.png",
-  "VGK": "Vegas Golden Knights.png",
   "LAK": "Los Angeles Kings.png",
-  "PIT": "Pittsburgh Penguins.png",
-  "VAN": "vancouver canucks.png",
-  "ANA": "Anaheim Ducks.png"
+  "NYR": "New York Rangers.png",
+  "SEA": "Seattle Kraken.png",
+  "UTA": "Utah Mammoth.png"
 };
 
 const ABBR_TO_KEYWORDS = {
+  "BOS": [
+    "cvhl boston bruins",
+    "cvhl",
+    "boston",
+    "bruins",
+    "boston bruins",
+    "bos"
+  ],
   "BUF": [
-    "tthl buffalo sabres",
+    "cvhl buffalo sabres",
+    "cvhl",
+    "buffalo",
+    "sabres",
     "buffalo sabres",
     "buf"
   ],
-  "CGY": [
-    "tthl calgary flames",
-    "calgary flames",
-    "cgy"
+  "DAL": [
+    "cvhl dallas stars",
+    "cvhl",
+    "dallas",
+    "stars",
+    "dallas stars",
+    "dal"
   ],
   "DET": [
-    "tthl detroit red wings",
+    "cvhl detroit red wings",
+    "cvhl",
+    "detroit",
+    "red",
+    "wings",
     "detroit red wings",
     "det"
   ],
-  "VGK": [
-    "tthl vegas golden knights",
-    "vegas golden knights",
-    "vgk"
-  ],
   "LAK": [
-    "tthl los angeles kings",
+    "cvhl los angeles kings",
+    "cvhl",
+    "los",
+    "angeles",
+    "kings",
     "la kings",
     "lak"
   ],
-  "PIT": [
-    "tthl penguins",
-    "pittsburgh penguins",
-    "pit"
+  "NYR": [
+    "cvhl new york rangers",
+    "cvhl",
+    "new",
+    "york",
+    "rangers",
+    "new york rangers",
+    "nyr"
   ],
-  "VAN": [
-    "tthl vancouver canucks",
-    "vancouver canucks",
-    "van"
+  "SEA": [
+    "cvhl seattle kraken",
+    "cvhl",
+    "seattle",
+    "kraken",
+    "seattle kraken",
+    "sea"
   ],
-  "ANA": [
-    "tthl anaheim ducks",
-    "anaheim ducks",
-    "ana"
+  "UTA": [
+    "cvhl utah mammoth",
+    "cvhl",
+    "utah",
+    "mammoth",
+    "utah mammoth",
+    "uta"
   ]
 };
 
