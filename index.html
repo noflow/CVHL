@@ -7,17 +7,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --teal:    #1a5276;
-    --teal2:   #366c8e;
-    --teal3:   #d6eaf8;
-    --ice:     #f0f7ff;
-    --white:   #ffffff;
-    --grey1:   #f2f3f4;
-    --grey2:   #d5d8dc;
-    --grey3:   #888888;
-    --black:   #111111;
-    --accent:  #e74c3c;
-    --gold:    #f39c12;
+    --teal:    #081426;
+    --teal2:   #153b65;
+    --teal3:   #dfedfc;
+    --ice:     #070d18;
+    --white:   #f7faff;
+    --grey1:   #eaf0f8;
+    --grey2:   #b9cbe1;
+    --grey3:   #566980;
+    --black:   #101b2d;
+    --accent:  #e32636;
+    --gold:    #40c6ff;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -1772,6 +1772,55 @@
   .score-matchup-teams { gap: 6px; }
   .score-matchup-columns { grid-template-columns: 1fr; }
 }
+
+</style>
+<style id="league-theme">
+/* CVHL: dark arena, electric blue, silver and Canadian red accents. */
+body {
+  background: radial-gradient(ellipse at 85% 0, #11345c66, transparent 48%),
+              radial-gradient(ellipse at 0 0, #b7162a22, transparent 35%), var(--ice);
+}
+header {
+  background: linear-gradient(110deg, #04070d, var(--teal) 60%, #102d52);
+  border-bottom: 2px solid var(--gold);
+  box-shadow: 0 2px 22px #009dff33;
+}
+.logo { text-shadow: 0 1px 0 #000, 0 0 16px #a7d8ff33; }
+.logo span { color: var(--gold); }
+nav button.active {
+  background: #0e63b7;
+  box-shadow: inset 0 -2px 0 var(--gold);
+}
+nav button:hover { background: #154275; }
+.section-title {
+  color: #edf5ff;
+  background: transparent;
+  border-left-color: var(--accent);
+}
+.controls { background: var(--ice); }
+.controls .filter-label, .controls .record-count { color: #b5c7dc; }
+.home-hero {
+  background: radial-gradient(ellipse at 100% 100%, #0862ac77, transparent 65%),
+              linear-gradient(120deg, #060c17, #102748);
+  border: 1px solid #248de0;
+  border-top: 3px solid var(--gold);
+  border-left: 3px solid var(--accent);
+  box-shadow: 0 0 26px #007cff22;
+}
+.home-title { color: #f4f8ff; text-shadow: 0 2px 0 #07101e, 0 0 24px #119fff44; }
+.home-metric, .leader-card, .division-block, .table-wrap, .game-card {
+  box-shadow: 0 6px 22px #0005;
+}
+.home-metric { border-top: 3px solid #1987df; }
+.leader-card-title, .division-title, .team-banner {
+  background: linear-gradient(110deg, #060d19, #12355f);
+  border-bottom: 2px solid #219ee8;
+}
+.team-btn.active { background: #0e63b7; border-color: #40c6ff; }
+.team-banner-cap-value { color: #77d7ff; }
+.score-bar { border-bottom-color: var(--gold); }
+.score-matchup { border-color: #249ce9; box-shadow: 0 24px 80px #000b, 0 0 24px #008dff22; }
+footer { color: #b5c7dc; }
 
 </style>
 </head>
