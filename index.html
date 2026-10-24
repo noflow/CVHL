@@ -472,6 +472,20 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .leader-player-link {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .leader-player-link:hover { text-decoration: underline; }
+  .leader-player-link:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 2px; }
+  .leader-player-link:disabled { cursor: wait; opacity: .65; }
   .leader-team {
     color: var(--grey3);
     font-size: 10px;
@@ -2405,7 +2419,7 @@ async function loadHomeSettings() {
   return homeSettings;
 }
 
-function buildPlayerLeaders(title, colNames, valueKind = "number", data = playerData) {
+function buildPlayerLeaders(title, colNames, valueKind = "number", data = playerData, season = "regular") {
   const nameIdx = columnIndex(data.cols, ["Username", "Player", "Name"]);
   const teamIdx = columnIndex(data.cols, ["Team", "Club"]);
   const statIdx = columnIndex(data.cols, colNames);
@@ -2416,6 +2430,7 @@ function buildPlayerLeaders(title, colNames, valueKind = "number", data = player
       name: row[nameIdx],
       team: teamIdx >= 0 ? row[teamIdx] : "",
       value: rowStat(row, statIdx),
+      card: { name: row[nameIdx], row, headers: data.cols, isGoalie: false, season },
     }))
     .filter(item => item.name && !/^total/i.test(item.name) && !isHiddenPlayerName(item.name) && Number.isFinite(item.value))
     .sort((a, b) => b.value - a.value)
@@ -2444,7 +2459,7 @@ function qualifiedGoalieRows(data = goalieData, teamGamesByTeam = goalieStarterG
   });
 }
 
-function buildGoalieLeaders(title, colNames, ascending, valueKind, data = goalieData, teamGamesByTeam = goalieStarterGamesByTeam) {
+function buildGoalieLeaders(title, colNames, ascending, valueKind, data = goalieData, teamGamesByTeam = goalieStarterGamesByTeam, season = "regular") {
   const nameIdx = columnIndex(data.cols, ["Username", "Goalie", "Player", "Name"]);
   const teamIdx = columnIndex(data.cols, ["Team", "Club"]);
   const statIdx = columnIndex(data.cols, colNames);
@@ -2455,6 +2470,7 @@ function buildGoalieLeaders(title, colNames, ascending, valueKind, data = goalie
       name: row[nameIdx],
       team: teamIdx >= 0 ? row[teamIdx] : "",
       value: rowStat(row, statIdx),
+      card: { name: row[nameIdx], row, headers: data.cols, isGoalie: true, season },
     }))
     .filter(item => item.name && !isHiddenPlayerName(item.name) && Number.isFinite(item.value))
     .sort((a, b) => ascending ? a.value - b.value : b.value - a.value)
@@ -2471,7 +2487,7 @@ function renderLeaderCard(title, rows) {
           <div class="leader-rank">${i + 1}</div>
           ${teamLogoImg(item.team, "leader-logo", item.team)}
           <div>
-            <div class="leader-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+            <button type="button" class="leader-name leader-player-link" data-player-card="${escapeHtml(JSON.stringify(item.card))}" title="View ${escapeHtml(item.name)} player card" aria-haspopup="dialog">${escapeHtml(item.name)}</button>
             <div class="leader-team">${escapeHtml(nameToAbbr(item.team))}</div>
           </div>
           <div class="leader-value">${escapeHtml(item.valueText)}</div>
@@ -2485,6 +2501,27 @@ function renderLeaderCard(title, rows) {
     </div>
   `;
 }
+
+// One handler also covers leaderboards rebuilt when the selected season changes.
+document.addEventListener("click", async event => {
+  const button = event.target.closest("button.leader-player-link");
+  if (!button || button.disabled) return;
+  const card = JSON.parse(button.dataset.playerCard);
+  const label = button.textContent;
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  button.textContent = "Loading…";
+  try {
+    await openPlayerModal(card.name, card.row, card.headers, card.isGoalie, card.season);
+  } catch (error) {
+    console.warn("Could not open leaderboard player card.", error);
+    alert("The player card could not load. Please try again.");
+  } finally {
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.textContent = label;
+  }
+});
 
 async function loadHome() {
   const homeEl = document.getElementById("home-content");
@@ -2527,14 +2564,14 @@ async function loadHome() {
     const seasonLabel = homePhase === "playoffs" ? `${baseSeasonLabel} Playoffs` : baseSeasonLabel;
 
     const leaderCards = [
-      buildPlayerLeaders("Top Goal Scorers", ["G", "Goals"], "number", homePlayerData),
-      buildPlayerLeaders("Top Assists", ["A", "Assists"], "number", homePlayerData),
-      buildPlayerLeaders("Plus / Minus", ["Plus Minus", "+/-", "Plus/Minus"], "plusminus", homePlayerData),
-      buildPlayerLeaders("Hits", ["Hits"], "number", homePlayerData),
-      buildPlayerLeaders("Interceptions", ["Interceptions", "INT"], "number", homePlayerData),
-      buildPlayerLeaders("Takeaways", ["Takeaways", "Take Aways", "TK"], "number", homePlayerData),
-      buildGoalieLeaders("Goalies: GAA", ["GAA"], true, "gaa", homeGoalieData, homeTeamGamesByTeam),
-      buildGoalieLeaders("Goalies: Save %", ["Save %", "SV%", "Save Percentage"], false, "pct", homeGoalieData, homeTeamGamesByTeam),
+      buildPlayerLeaders("Top Goal Scorers", ["G", "Goals"], "number", homePlayerData, homePhase),
+      buildPlayerLeaders("Top Assists", ["A", "Assists"], "number", homePlayerData, homePhase),
+      buildPlayerLeaders("Plus / Minus", ["Plus Minus", "+/-", "Plus/Minus"], "plusminus", homePlayerData, homePhase),
+      buildPlayerLeaders("Hits", ["Hits"], "number", homePlayerData, homePhase),
+      buildPlayerLeaders("Interceptions", ["Interceptions", "INT"], "number", homePlayerData, homePhase),
+      buildPlayerLeaders("Takeaways", ["Takeaways", "Take Aways", "TK"], "number", homePlayerData, homePhase),
+      buildGoalieLeaders("Goalies: GAA", ["GAA"], true, "gaa", homeGoalieData, homeTeamGamesByTeam, homePhase),
+      buildGoalieLeaders("Goalies: Save %", ["Save %", "SV%", "Save Percentage"], false, "pct", homeGoalieData, homeTeamGamesByTeam, homePhase),
     ].join("");
 
     homeEl.innerHTML = `
