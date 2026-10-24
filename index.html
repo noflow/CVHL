@@ -1724,6 +1724,49 @@
   .score-bar-card { width: 166px; flex-basis: 166px; padding: 8px 12px; }
 }
 
+/* Clickable game matchup */
+.score-matchup { margin: auto; width: min(680px, calc(100% - 24px)); max-height: calc(100dvh - 32px); overflow: auto; border: 1px solid var(--teal2); border-radius: 18px; padding: 24px; background: var(--teal); color: #fff; box-shadow: 0 24px 80px #0008; }
+.score-matchup::backdrop { background: #06111ddd; }
+.score-matchup-top { display: flex; align-items: start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.score-matchup h2, .score-matchup h3 { font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1.5px; text-transform: uppercase; }
+.score-matchup h2 { font-size: 16px; margin: 0 0 8px; }
+.score-matchup h3 { color: var(--gold); font-size: 13px; margin: 0 0 12px; }
+.score-matchup p { margin: 8px 0; font-size: 12px; line-height: 1.5; }
+.score-matchup-meta, .score-matchup-note { color: #dbe5ee; }
+.score-matchup-close, .score-matchup-box-button { cursor: pointer; border: 1px solid #ffffff40; border-radius: 8px; background: #0003; color: #fff; padding: 9px 12px; font: inherit; }
+.score-matchup-close:focus-visible, .score-matchup-box-button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.score-matchup-close { font-size: 20px; line-height: 1; }
+.score-matchup-teams { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; }
+.score-matchup-team { background: #0003; border: 1px solid #ffffff12; border-radius: 14px; padding: 18px 10px; text-align: center; min-width: 0; }
+.score-matchup-logo { display: block; margin: 0 auto 10px; width: 90px; height: 90px; object-fit: contain; }
+.score-matchup-name { font: 700 22px 'Barlow Condensed', sans-serif; }
+.score-matchup-score { font: 900 38px 'Barlow Condensed', sans-serif; margin: 6px 0; }
+.score-matchup-versus { font: 700 16px 'Barlow Condensed', sans-serif; }
+.score-matchup-section { border-top: 1px solid #ffffff20; padding-top: 16px; margin-top: 16px; }
+.score-matchup-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.score-matchup-column { background: #0003; border: 1px solid #ffffff18; border-radius: 12px; padding: 12px; min-width: 0; }
+.score-matchup-column h4 { font: 700 15px 'Barlow Condensed', sans-serif; margin: 0 0 10px; }
+.score-matchup-form { display: flex; flex-wrap: wrap; gap: 5px; }
+.score-matchup-result { display: inline-flex; align-items: center; justify-content: center; min-width: 25px; height: 24px; border-radius: 5px; color: #082033; background: #ff8585; font-size: 11px; font-weight: 700; }
+.score-matchup-result.win { background: #65e2ac; }
+.score-matchup-result.ot { background: #ffd37a; }
+.score-matchup-player { display: flex; align-items: center; gap: 9px; padding: 10px 0; border-top: 1px solid #ffffff18; }
+.score-matchup-player:first-of-type { border: 0; }
+.score-matchup-player strong { display: block; overflow-wrap: anywhere; font-size: 14px; }
+.score-matchup-player small { display: block; color: #dbe5ee; margin-top: 4px; font-size: 11px; }
+.score-matchup-position { display: grid; place-items: center; flex: 0 0 28px; height: 25px; border-radius: 4px; background: #ffffff15; border-left: 4px solid var(--position-color); color: #fff; font-size: 11px; font-weight: 700; }
+.score-matchup-meeting { display: flex; justify-content: space-between; gap: 12px; margin-top: 7px; font-size: 12px; }
+.score-matchup-table { max-width: 100%; overflow: auto; margin-top: 12px; }
+.score-matchup-table table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.score-matchup-table th, .score-matchup-table td { padding: 7px; border-bottom: 1px solid #ffffff20; text-align: left; color: #fff; background: transparent; white-space: nowrap; }
+@media (max-width: 480px) {
+  .score-matchup { padding: 16px; }
+  .score-matchup-logo { width: 62px; height: 62px; }
+  .score-matchup-name { font-size: 18px; }
+  .score-matchup-teams { gap: 6px; }
+  .score-matchup-columns { grid-template-columns: 1fr; }
+}
+
 </style>
 </head>
 <body>
@@ -6487,6 +6530,14 @@ initSite();
   </div>
 </div>
 
+<dialog id="score-matchup" class="score-matchup" aria-labelledby="score-matchup-title" aria-describedby="score-matchup-meta">
+  <div class="score-matchup-top">
+    <div><h2 id="score-matchup-title">Game Matchup</h2><p id="score-matchup-meta" class="score-matchup-note"></p></div>
+    <button type="button" id="score-matchup-close" class="score-matchup-close" aria-label="Close matchup">&#10005;</button>
+  </div>
+  <div id="score-matchup-content"></div>
+</dialog>
+
 <script>
 // BEGIN latest-score-data
 function scoreNightDate(value) {
@@ -6504,7 +6555,7 @@ function scoreNightDate(value) {
   return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
-function latestScoreNight(logs) {
+function scoreGames(logs) {
   const games = new Map();
   for (const { data, phase } of logs) {
     const idx = Object.fromEntries(data.cols.map((c, i) => [String(c).trim(), i]));
@@ -6532,10 +6583,79 @@ function latestScoreNight(logs) {
         overtime: /^(yes|true|1)$/i.test(get('OT')) });
     }
   }
-  const date = [...games.values()].reduce((latest, game) => game.date > latest ? game.date : latest, '');
-  return { date, games: [...games.values()].filter(game => game.date === date)
-    .sort((a, b) => a.time.localeCompare(b.time) || a.id.localeCompare(b.id)) };
+  return [...games.values()].sort((a, b) => a.time.localeCompare(b.time) || a.id.localeCompare(b.id));
 }
+function latestScoreNight(logs) {
+  const games = scoreGames(logs);
+  const date = games.reduce((latest, game) => game.date > latest ? game.date : latest, '');
+  return { date, games: games.filter(game => game.date === date) };
+}
+function scoreMatchupHistory(game, games, normalize) {
+  const a = normalize(game.team1), b = normalize(game.team2);
+  const season = games.filter(item => item.phase === game.phase)
+    .sort((x, y) => y.date.localeCompare(x.date) || y.time.localeCompare(x.time) || y.id.localeCompare(x.id));
+  const result = (item, team) => {
+    const own = normalize(item.team1) === team ? item.score1 : item.score2;
+    const other = normalize(item.team1) === team ? item.score2 : item.score1;
+    return own > other ? 'W' : item.overtime ? 'OTL' : 'L';
+  };
+  const meetings = season.filter(item => [normalize(item.team1), normalize(item.team2)].includes(a) &&
+    [normalize(item.team1), normalize(item.team2)].includes(b));
+  const form = team => season.filter(item => normalize(item.team1) === team || normalize(item.team2) === team)
+    .slice(0, 5).map(item => ({ result: result(item, team), date: item.date, score: `${item.score1}-${item.score2}` }));
+  return { meetings, wins1: meetings.filter(item => result(item, a) === 'W').length,
+    wins2: meetings.filter(item => result(item, b) === 'W').length, form1: form(a), form2: form(b) };
+}
+
+function scoreMatchupStanding(data, team, normalize) {
+  if (!data) return null;
+  const cols = data.cols.map(c => String(c).trim().toUpperCase());
+  // Published standings can begin with a merged division heading, rather than column labels.
+  const index = (labels, fallback) => { const found = cols.findIndex(c => labels.includes(c)); return found < 0 ? fallback : found; };
+  const ti = index(['TEAM', 'CLUB'], 0), gp = index(['GP', 'GAMES PLAYED'], 1);
+  const wi = index(['W', 'WINS'], 2), li = index(['L', 'LOSSES'], 3), oi = index(['OTL', 'OT'], 4), pi = index(['PTS', 'POINTS'], 5);
+  const rows = data.rows.filter(row => String(row[ti] || '').trim() && /^\d+$/.test(String(row[gp] ?? '').trim()));
+  const row = rows.find(row => normalize(row[ti]) === normalize(team));
+  if (!row) return null;
+  const value = i => /^\d+$/.test(String(row[i] ?? '').trim()) ? Number(row[i]) : null;
+  const points = value(pi);
+  return { gp: value(gp), wins: value(wi), losses: value(li), otl: value(oi), points,
+    rank: points === null ? null : 1 + rows.filter(other => Number(other[pi]) > points).length };
+}
+
+function scoreMatchupLeaders(data, team, normalize, goalie = false) {
+  if (!data) return [];
+  const cols = data.cols.map(c => String(c).trim().toLowerCase());
+  const index = labels => cols.findIndex(c => labels.includes(c));
+  const ni = index(['username', 'player', 'goalie', 'name']), ti = index(['team', 'club']);
+  const gp = index(['gp', 'games played']), pts = index(['pts', 'points']), goals = index(['g', 'goals']);
+  if (ni < 0 || ti < 0 || gp < 0) return [];
+  const number = (row, i) => Number(String(row[i] ?? '').replace(/[%+,]/g, '')) || 0;
+  const unique = new Map();
+  data.rows.filter(row => normalize(row[ti]) === normalize(team) && number(row, gp) > 0).forEach(row => {
+    const name = String(row[ni] || '').trim();
+    if (!name || /^totals?$/i.test(name)) return;
+    const key = name.toLowerCase();
+    // The caller supplies consolidated player rows; suppress duplicate total rows defensively.
+    if (!unique.has(key) || number(row, gp) > number(unique.get(key), gp)) unique.set(key, row);
+  });
+  return [...unique.values()].sort((a, b) => goalie
+    ? number(b, gp) - number(a, gp) || number(b, index(['saves'])) - number(a, index(['saves'])) || String(a[ni]).localeCompare(String(b[ni]))
+    : number(b, pts) - number(a, pts) || number(b, goals) - number(a, goals) || String(a[ni]).localeCompare(String(b[ni])))
+    .slice(0, goalie ? 1 : 3).map(row => ({ name: String(row[ni]), gp: number(row, gp),
+      position: goalie ? 'G' : String(row[index(['position', 'pos'])] || ''),
+      goals: number(row, goals), assists: number(row, index(['a', 'assists'])), points: number(row, pts),
+      save: String(row[index(['save %', 'sv%', 'save percentage'])] || ''),
+      gaa: String(row[index(['gaa'])] ?? '') }));
+}
+
+function scoreMatchupBoxRows(data, matchId) {
+  const index = data.cols.indexOf('Match ID');
+  if (index < 0 || !matchId || String(matchId).includes('|')) return [];
+  const parts = new Set(String(matchId).split(/[+,\-]/).map(id => id.trim()).filter(Boolean));
+  return data.rows.filter(row => String(row[index] || '').split(/[+,\-]/).some(id => parts.has(id.trim())));
+}
+
 // END latest-score-data
 
 (() => {
@@ -6546,6 +6666,126 @@ function latestScoreNight(logs) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let paused = reducedMotion.matches, hovering = false, busy = false;
   let signature = '', displayedSheet = '', group = null, loopWidth = 0, position = 0, lastFrame = 0;
+  const matchup = document.getElementById('score-matchup');
+  const matchupContent = document.getElementById('score-matchup-content');
+  let matchupRequest = 0, scoreLogSnapshot = [];
+  const matchupStatsCache = new Map();
+  const safe = value => escapeHtml(String(value ?? ''));
+  const teamKey = value => nameToAbbr(value).trim().toUpperCase();
+  const gameDateLabel = value => new Date(value + 'T12:00:00Z').toLocaleDateString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  matchup.addEventListener('close', () => { matchupRequest++; });
+  matchup.addEventListener('click', event => { if (event.target === matchup) { const r = matchup.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) matchup.close(); } });
+  document.getElementById('score-matchup-close').addEventListener('click', () => matchup.close());
+
+  async function readMatchupTable(sheet, tab) {
+    if (!sheet) throw new Error('No stats sheet configured for this season.');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheet)}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(tab)}&cb=${Date.now()}`;
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) throw new Error('Stats are temporarily unavailable.');
+      const rows = parseCSV(await response.text());
+      return { cols: (rows.shift() || []).map(c => String(c).trim()), rows };
+    } finally { clearTimeout(timer); }
+  }
+  function standingHtml(standing) {
+    if (!standing) return '<p class="score-matchup-note">Record unavailable</p>';
+    const value = n => n === null ? '—' : n;
+    return `<p><strong>${value(standing.wins)}–${value(standing.losses)}–${value(standing.otl)}</strong> W–L–OTL</p>
+      <p class="score-matchup-note">${value(standing.points)} PTS${standing.rank === null ? '' : ` · #${standing.rank} by points`}</p>`;
+  }
+  function formHtml(items) {
+    return items.length ? `<div class="score-matchup-form">${items.map(item =>
+      `<span class="score-matchup-result ${item.result === 'W' ? 'win' : item.result === 'OTL' ? 'ot' : ''}" title="${safe(gameDateLabel(item.date))}">${item.result}</span>`).join('')}</div>`
+      : '<p class="score-matchup-note">No completed games yet.</p>';
+  }
+  function performerHtml(player, goalie = false) {
+    const position = posShort(player.position) || '—';
+    let save = player.save;
+    if (save && !save.includes('%') && Number.isFinite(Number(save))) save = `${(Number(save) <= 1 ? Number(save) * 100 : Number(save)).toFixed(1)}%`;
+    const gaa = player.gaa !== '' && Number.isFinite(Number(player.gaa)) ? Number(player.gaa).toFixed(2) : '—';
+    const stats = goalie ? `${player.gp} GP · ${save || '—'} SV% · ${gaa} GAA`
+      : `${player.gp} GP · ${player.goals} G · ${player.assists} A · ${player.points} PTS`;
+    return `<div class="score-matchup-player"><span class="score-matchup-position" style="--position-color:${positionChartColor(position)}">${safe(position)}</span>
+      <div><strong>${safe(player.name)}</strong><small>${safe(stats)}</small></div></div>`;
+  }
+  function leadersHtml(players, goalies, team) {
+    const prepare = (data, goalie) => {
+      if (!data) return null;
+      const ni = data.cols.findIndex(col => /^(username|player|goalie|name)$/i.test(col));
+      return { ...data, rows: buildLeaguePlayerRows(data.rows, data.cols, goalie).filter(row => !isHiddenPlayerName(row[ni])) };
+    };
+    const skaters = scoreMatchupLeaders(prepare(players, false), team, teamKey).filter(player => !isHiddenPlayerName(player.name));
+    const keepers = scoreMatchupLeaders(prepare(goalies, true), team, teamKey, true).filter(player => !isHiddenPlayerName(player.name));
+    return `${skaters.map(player => performerHtml(player)).join('') || '<p class="score-matchup-note">Skater stats unavailable.</p>'}
+      ${keepers.map(player => performerHtml(player, true)).join('') || '<p class="score-matchup-note">Goalie stats unavailable.</p>'}`;
+  }
+  async function openMatchup(game, opener) {
+    const request = ++matchupRequest;
+    const sheet = sourceSheetIdForSelectedSeason(), statsSheet = publishSheetIdForSeason(game.phase);
+    const history = scoreMatchupHistory(game, scoreGames(scoreLogSnapshot), teamKey);
+    const names = [displayTeamName(game.team1), displayTeamName(game.team2)];
+    const phase = game.phase === 'playoffs' ? 'Playoffs' : 'Regular season';
+    document.getElementById('score-matchup-title').textContent = `Game Matchup · Final${game.forfeit ? ' · Forfeit' : game.overtime ? ' / OT' : ''}`;
+    const seasonLabel = currentWebsiteSeason().label || 'Current season';
+    document.getElementById('score-matchup-meta').textContent = `${gameDateLabel(game.date)} · ${seasonLabel} · ${phase}`;
+    matchupContent.innerHTML = `<div class="score-matchup-teams">${[game.team1, game.team2].map((team, i) =>
+      `${i ? '<span class="score-matchup-versus">VS</span>' : ''}<div class="score-matchup-team">${teamLogoImg(team, 'score-matchup-logo', '')}
+        <div class="score-matchup-name">${safe(names[i])}</div><div class="score-matchup-score">${i ? game.score2 : game.score1}</div>
+        <div id="score-matchup-record-${i}"><p class="score-matchup-note">Loading record…</p></div></div>`).join('')}</div>
+      <section class="score-matchup-section"><h3>Season Series</h3><p>${history.meetings.length ? `${safe(names[0])} ${history.wins1} – ${history.wins2} ${safe(names[1])}` : 'These teams have not met this season.'}</p>
+        ${history.meetings.slice(0, 5).map(item => `<div class="score-matchup-meeting"><span>${safe(gameDateLabel(item.date))}</span>
+          <span>${safe(teamKey(item.team1))} ${item.score1} – ${item.score2} ${safe(teamKey(item.team2))}${item.overtime ? ' OT' : ''}</span></div>`).join('')}
+        ${history.meetings.length > 5 ? '<p class="score-matchup-note">Showing the five latest meetings.</p>' : ''}</section>
+      <section class="score-matchup-section"><h3>Recent Form</h3><p class="score-matchup-note">Latest five completed games, newest first.</p>
+        <div class="score-matchup-columns">${names.map((name, i) => `<div class="score-matchup-column"><h4>${safe(name)}</h4>${formHtml(i ? history.form2 : history.form1)}</div>`).join('')}</div></section>
+      <section class="score-matchup-section"><h3>Top Performers</h3><p class="score-matchup-note">${phase} to date · Top three by points and goalie with the most games played.</p>
+        <div class="score-matchup-columns">${names.map((name, i) => `<div class="score-matchup-column"><h4>${safe(name)}</h4><div id="score-matchup-leaders-${i}" aria-live="polite"><p>Loading performers…</p></div></div>`).join('')}</div></section>
+      <section class="score-matchup-section"><button type="button" class="score-matchup-box-button" id="score-matchup-box-button">View full box score</button><div id="score-matchup-box" aria-live="polite"></div></section>`;
+    if (!matchup.open) matchup.showModal();
+    document.getElementById('score-matchup-close').focus();
+    matchup.addEventListener('close', () => { if (opener?.isConnected) opener.focus(); }, { once: true });
+    document.getElementById('score-matchup-box-button').addEventListener('click', () => loadMatchupBox(game, sheet, request));
+    const cacheKey = `${statsSheet}|${game.phase}`;
+    let cached = matchupStatsCache.get(cacheKey);
+    if (!cached || Date.now() - cached.time > 120000) {
+      const results = await Promise.allSettled(['Standings', 'Player Stats', 'Goalie Stats'].map(tab => readMatchupTable(statsSheet, tab)));
+      cached = { time: Date.now(), tables: results.map(result => result.status === 'fulfilled' ? result.value : null) };
+      if (results.every(result => result.status === 'fulfilled')) matchupStatsCache.set(cacheKey, cached);
+    }
+    if (request !== matchupRequest || !matchup.open || sheet !== sourceSheetIdForSelectedSeason()) return;
+    [game.team1, game.team2].forEach((team, i) => {
+      document.getElementById(`score-matchup-record-${i}`).innerHTML = standingHtml(scoreMatchupStanding(cached.tables[0], team, teamKey));
+      try { document.getElementById(`score-matchup-leaders-${i}`).innerHTML = leadersHtml(cached.tables[1], cached.tables[2], team); }
+      catch { document.getElementById(`score-matchup-leaders-${i}`).textContent = 'Performer stats unavailable.'; }
+    });
+  }
+  async function loadMatchupBox(game, sheet, request) {
+    const button = document.getElementById('score-matchup-box-button');
+    const target = document.getElementById('score-matchup-box');
+    button.disabled = true;
+    target.textContent = 'Loading box score…';
+    const prefix = game.phase === 'playoffs' ? 'Playoff ' : '';
+    const results = await Promise.allSettled([readMatchupTable(sheet, prefix + 'Skater Log'), readMatchupTable(sheet, prefix + 'Goalie Log')]);
+    if (request !== matchupRequest || !matchup.open) return;
+
+    const table = (result, goalie) => {
+      if (result.status !== 'fulfilled') return '<p>Box score stats are temporarily unavailable.</p>';
+      const data = result.value, idx = Object.fromEntries(data.cols.map((c, i) => [c, i]));
+      const rows = scoreMatchupBoxRows(data, game.id);
+      const columns = goalie ? ['Username', 'Team', 'Shots Against', 'Saves', 'Goals Against', 'Save %'] : ['Username', 'Team', 'Position', 'Goals', 'Assists', 'Points', 'Shots', 'Hits'];
+      const visible = columns.filter(col => idx[col] !== undefined);
+      if (!rows.length || !visible.length) return `<p class="score-matchup-note">No ${goalie ? 'goalie' : 'skater'} box score recorded${game.forfeit ? ' for this forfeit' : ' for this game'}.</p>`;
+      return `<div class="score-matchup-table"><table><caption>${goalie ? 'Goalies' : 'Skaters'}</caption><thead><tr>${visible.map(col => `<th scope="col">${safe(col)}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(row => `<tr>${visible.map(col => `<td>${safe(col === 'Team' ? teamKey(row[idx[col]]) : row[idx[col]])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    };
+    target.innerHTML = results.map((result, i) => table(result, i === 1)).join('');
+    button.textContent = 'Refresh box score';
+    button.disabled = false;
+  }
+
 
   function setPaused(value) {
     paused = value;
@@ -6577,7 +6817,10 @@ function latestScoreNight(logs) {
       const card = document.createElement('a');
       card.className = 'score-bar-card';
       card.href = '#games';
-      card.setAttribute('aria-label', `${displayTeamName(game.team1)} ${game.score1}, ${displayTeamName(game.team2)} ${game.score2}. View recent games.`);
+      card.dataset.matchId = game.id;
+      card.dataset.phase = game.phase;
+      card.setAttribute('aria-haspopup', 'dialog');
+      card.setAttribute('aria-label', `${displayTeamName(game.team1)} ${game.score1}, ${displayTeamName(game.team2)} ${game.score2}. View matchup.`);
       const status = document.createElement('span');
       status.className = 'score-bar-status';
       status.textContent = `${game.phase === 'playoffs' ? 'PLAYOFFS Â· ' : ''}FINAL${game.forfeit ? ' Â· FORFEIT' : game.overtime ? ' / OT' : ''}`;
@@ -6627,7 +6870,8 @@ function latestScoreNight(logs) {
     try {
       const [regular, playoffs] = await Promise.all([readLog(sheet, 'Game Log'), readLog(sheet, 'Playoff Game Log', true)]);
       if (sheet !== sourceSheetIdForSelectedSeason()) return;
-      const night = latestScoreNight([{ data: regular, phase: 'regular' }, { data: playoffs, phase: 'playoffs' }]);
+      scoreLogSnapshot = [{ data: regular, phase: 'regular' }, { data: playoffs, phase: 'playoffs' }];
+      const night = latestScoreNight(scoreLogSnapshot);
       const next = JSON.stringify(night);
       if (next !== signature) { render(night); signature = next; }
     } catch (error) {
@@ -6641,7 +6885,7 @@ function latestScoreNight(logs) {
   function animate(time) {
     const elapsed = Math.min(time - lastFrame, 50);
     lastFrame = time;
-    if (loopWidth && !bar.hidden && !paused && !hovering && !document.hidden && !viewport.contains(document.activeElement)) {
+    if (loopWidth && !matchup.open && !bar.hidden && !paused && !hovering && !document.hidden && !viewport.contains(document.activeElement)) {
       position = (position + elapsed * .025) % loopWidth;
       viewport.scrollLeft = position;
     } else { position = viewport.scrollLeft; }
@@ -6660,14 +6904,16 @@ function latestScoreNight(logs) {
   bar.addEventListener('mouseenter', () => { hovering = true; });
   bar.addEventListener('mouseleave', () => { hovering = false; });
   track.addEventListener('click', event => {
-    if (!event.target.closest('a')) return;
+    const card = event.target.closest('a[data-match-id]');
+    if (!card) return;
     event.preventDefault();
-    showPage('games', document.querySelector('nav button[onclick*="\'games\'"]'));
+    const game = scoreGames(scoreLogSnapshot).find(item => item.id === card.dataset.matchId && item.phase === card.dataset.phase);
+    if (game) openMatchup(game, card);
   });
   reducedMotion.addEventListener('change', () => setPaused(reducedMotion.matches));
   new ResizeObserver(resizeTrack).observe(viewport);
   document.addEventListener('change', event => {
-    if (event.target.matches('.website-season-select')) refresh();
+    if (event.target.matches('.website-season-select')) { if (matchup.open) matchup.close(); refresh(); }
   });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   setPaused(paused);
