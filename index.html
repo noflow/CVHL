@@ -1766,6 +1766,10 @@
 .score-matchup-player small { display: block; color: #dbe5ee; margin-top: 4px; font-size: 11px; }
 .score-matchup-position { display: grid; place-items: center; flex: 0 0 28px; height: 25px; border-radius: 4px; background: #ffffff15; border-left: 4px solid var(--position-color); color: #fff; font-size: 11px; font-weight: 700; }
 .score-matchup-meeting { display: flex; justify-content: space-between; gap: 12px; margin-top: 7px; font-size: 12px; }
+.score-matchup-team-tabs { display: flex; gap: 8px; margin-top: 16px; }
+.score-matchup-team-tabs button { flex: 1; min-width: 0; padding: 10px; border: 1px solid #ffffff40; border-radius: 6px; background: #0003; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.score-matchup-team-tabs button[aria-selected="true"] { background: #ffffff18; border-color: var(--gold); box-shadow: inset 0 -3px var(--gold); }
+.score-matchup-team-tabs button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .score-matchup-table { max-width: 100%; overflow: auto; margin-top: 12px; }
 .score-matchup-table table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .score-matchup-table tbody tr { background: transparent; }
@@ -6687,6 +6691,12 @@ function scoreMatchupBoxRows(data, matchId) {
   return data.rows.filter(row => String(row[index] || '').split(/[+,\-]/).some(id => parts.has(id.trim())));
 }
 
+function scoreMatchupTeamBoxRows(data, matchId, team, normalize) {
+  const teamIndex = data.cols.indexOf('Team');
+  if (teamIndex < 0) return [];
+  return scoreMatchupBoxRows(data, matchId).filter(row =>
+    String(row[teamIndex] || '').trim() && normalize(row[teamIndex]) === normalize(team));
+}
 // END latest-score-data
 
 (() => {
@@ -6800,17 +6810,41 @@ function scoreMatchupBoxRows(data, matchId) {
     const results = await Promise.allSettled([readMatchupTable(sheet, prefix + 'Skater Log'), readMatchupTable(sheet, prefix + 'Goalie Log')]);
     if (request !== matchupRequest || !matchup.open) return;
 
-    const table = (result, goalie) => {
+    const table = (result, goalie, team) => {
       if (result.status !== 'fulfilled') return '<p>Box score stats are temporarily unavailable.</p>';
       const data = result.value, idx = Object.fromEntries(data.cols.map((c, i) => [c, i]));
-      const rows = scoreMatchupBoxRows(data, game.id);
-      const columns = goalie ? ['Username', 'Team', 'Shots Against', 'Saves', 'Goals Against', 'Save %'] : ['Username', 'Team', 'Position', 'Goals', 'Assists', 'Points', 'Shots', 'Hits'];
+      const rows = scoreMatchupTeamBoxRows(data, game.id, team, teamKey);
+      const columns = goalie ? ['Username', 'Shots Against', 'Saves', 'Goals Against', 'Save %'] : ['Username', 'Position', 'Goals', 'Assists', 'Points', 'Shots', 'Hits'];
       const visible = columns.filter(col => idx[col] !== undefined);
       if (!rows.length || !visible.length) return `<p class="score-matchup-note">No ${goalie ? 'goalie' : 'skater'} box score recorded${game.forfeit ? ' for this forfeit' : ' for this game'}.</p>`;
       return `<div class="score-matchup-table"><table><caption>${goalie ? 'Goalies' : 'Skaters'}</caption><thead><tr>${visible.map(col => `<th scope="col">${safe(col)}</th>`).join('')}</tr></thead>
         <tbody>${rows.map(row => `<tr>${visible.map(col => `<td>${safe(col === 'Team' ? teamKey(row[idx[col]]) : row[idx[col]])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
     };
-    target.innerHTML = results.map((result, i) => table(result, i === 1)).join('');
+    const teams = [game.team1, game.team2];
+    const selected = target.dataset.teamIndex === '1' ? 1 : 0;
+    target.innerHTML = `<div class="score-matchup-team-tabs" role="tablist" aria-label="Box score team">${teams.map((team, i) =>
+      `<button type="button" role="tab" id="score-box-tab-${i}" aria-controls="score-box-panel-${i}" aria-selected="${i === selected}" tabindex="${i === selected ? 0 : -1}">${safe(displayTeamName(team))}</button>`).join('')}</div>
+      ${teams.map((team, i) => `<div role="tabpanel" id="score-box-panel-${i}" aria-labelledby="score-box-tab-${i}" tabindex="0" ${i === selected ? '' : 'hidden'}>${results.map((result, j) => table(result, j === 1, team)).join('')}</div>`).join('')}`;
+    const tabs = [...target.querySelectorAll('[role="tab"]')];
+    const panels = [...target.querySelectorAll('[role="tabpanel"]')];
+    const selectTeam = index => {
+      target.dataset.teamIndex = String(index);
+      tabs.forEach((tab, i) => {
+        tab.setAttribute('aria-selected', String(i === index));
+        tab.tabIndex = i === index ? 0 : -1;
+        panels[i].hidden = i !== index;
+      });
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => selectTeam(i));
+      tab.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const index = event.key === 'Home' ? 0 : event.key === 'End' ? 1 : 1 - i;
+        selectTeam(index);
+        tabs[index].focus();
+      });
+    });
     button.textContent = 'Refresh box score';
     button.disabled = false;
   }
