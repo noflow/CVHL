@@ -6823,7 +6823,7 @@ function scoreMatchupBoxRows(data, matchId) {
       card.setAttribute('aria-label', `${displayTeamName(game.team1)} ${game.score1}, ${displayTeamName(game.team2)} ${game.score2}. View matchup.`);
       const status = document.createElement('span');
       status.className = 'score-bar-status';
-      status.textContent = `${game.phase === 'playoffs' ? 'PLAYOFFS Â· ' : ''}FINAL${game.forfeit ? ' Â· FORFEIT' : game.overtime ? ' / OT' : ''}`;
+      status.textContent = `${game.phase === 'playoffs' ? 'PLAYOFFS \u00b7 ' : ''}FINAL${game.forfeit ? ' \u00b7 FORFEIT' : game.overtime ? ' / OT' : ''}`;
       card.appendChild(status);
       [[game.team1, game.score1], [game.team2, game.score2]].forEach(([name, score]) => {
         const line = document.createElement('span');
