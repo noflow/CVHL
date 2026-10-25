@@ -3494,7 +3494,10 @@ function parseTeamBlockOfficialRosterSheet(rows) {
     }
   }
   Object.values(roster.teams).forEach(teamRoster => {
-    teamRoster.capRemaining = calculatedCapRemaining({ skaters: teamRoster.players, goalies: [] }) || teamRoster.capRemaining;
+    // The roster may use a newer league cap than the generated website config.
+    if (!teamRoster.capRemaining || teamRoster.capRemaining.startsWith("#")) {
+      teamRoster.capRemaining = calculatedCapRemaining({ skaters: teamRoster.players, goalies: [] });
+    }
   });
   return roster;
 }
@@ -4144,8 +4147,20 @@ function renderTeamFromMaster(abbr, { sk, gl }) {
 }
 
 
+// Roster names and salaries must remain visible before the first stats publish.
+function rosterStatsData(data, isGoalie) {
+  if (data.cols.some(col => String(col).trim() === "Username")) return data;
+  return {
+    cols: isGoalie
+      ? ["#", "Username", "Team", "Platform", "GP", "W", "L", "OTL", "GAA", "Save %"]
+      : ["#", "Username", "Team", "Platform", "Position", "GP", "G", "A", "PTS"],
+    rows: [],
+  };
+}
+
 function renderTeamRosterDashboard(abbr, data) {
-  const { sk, gl } = data;
+  const sk = rosterStatsData(data.sk, false);
+  const gl = rosterStatsData(data.gl, true);
   const team = TEAMS.find(t => t.abbr === abbr);
   const teamName = team ? team.name : abbr;
   const skHeaders = sk.cols;
