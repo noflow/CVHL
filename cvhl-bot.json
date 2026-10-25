@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "league_id": "continental-virtual-hockey-league",
+  "website": "https://noflow.github.io/CVHL/",
+  "league_name": "Continental Virtual Hockey League",
+  "source_sheet_id": "1WtRzxmnKRgff7OJVIHFQoKMq2BW_SuR0B5GTPYx9oak",
+  "regular_publish_sheet_id": "1BkumsptWbv0FJdku8PcwlYFfA2Sh7rV9uVQvPbMWwwM",
+  "playoff_publish_sheet_id": "",
+  "schedule_sheet_id": "1dZOFDB6siAPnhDIfDbpZLXG9DXQIJ5TIADLrTd4oeQc",
+  "roster_sheet_id": "1GqYg1fZ4q5NtHxiS5wqA89iqYxAhX5xqYDKKEjQn9PY",
+  "roster_sheet_tab": "Roster",
+  "banned_quit_tab": "Banned & Quit",
+  "teams": [
+    {
+      "abbr": "BOS",
+      "name": "Boston Bruins",
+      "logo": "Boston Bruins.png"
+    },
+    {
+      "abbr": "BUF",
+      "name": "Buffalo Sabres",
+      "logo": "Buffalo Sabres.png"
+    },
+    {
+      "abbr": "DAL",
+      "name": "Dallas Stars",
+      "logo": "Dallas Stars.png"
+    },
+    {
+      "abbr": "DET",
+      "name": "Detroit Red Wings",
+      "logo": "Detroit Red Wings.png"
+    },
+    {
+      "abbr": "LAK",
+      "name": "LA Kings",
+      "logo": "Los Angeles Kings.png"
+    },
+    {
+      "abbr": "NYR",
+      "name": "New York Rangers",
+      "logo": "New York Rangers.png"
+    },
+    {
+      "abbr": "SEA",
+      "name": "Seattle Kraken",
+      "logo": "Seattle Kraken.png"
+    },
+    {
+      "abbr": "UTA",
+      "name": "Utah Mammoth",
+      "logo": "Utah Mammoth.png"
+    }
+  ]
+}
