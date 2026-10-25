@@ -2322,7 +2322,12 @@ function parseCSV(text) {
   return rows;
 }
 
+function publishedLogTab(tabName) {
+  return /^(Playoff )?(Game|Skater|Goalie) Log$/.test(tabName) ? "Published " + tabName : tabName;
+}
+
 async function fetchSourceTab(tabName) {
+  tabName = publishedLogTab(tabName);
   // Use gviz CSV output — served via gviz (no CORS issues) AND
   // returns raw text values so "123+456" match IDs are preserved as-is
   const sheetId = sourceSheetIdForSelectedSeason();
@@ -2333,6 +2338,7 @@ async function fetchSourceTab(tabName) {
   const allRows = parseCSV(text);
   if (!allRows.length) return { cols: [], rows: [], numCols: 0 };
   const cols = allRows[0];   // row 0 = header
+  if (tabName.startsWith("Published ") && !cols.includes("Publication Status")) throw new Error("Cleared game data is not available yet.");
   const rows = allRows.slice(1).filter(r => r.some(c => String(c||"").trim() !== ""));
   return { cols, rows, numCols: cols.length };
 }
@@ -2766,6 +2772,7 @@ async function changeWebsiteSeason(seasonId) {
 }
 
 async function fetchSourceTabGviz(tabName) {
+  tabName = publishedLogTab(tabName);
   // Backup: standard gviz JSON (drops lagout rows with + in match ID)
   const sheetId = sourceSheetIdForSelectedSeason();
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}&headers=1&cb=${Date.now()}`;
@@ -2775,6 +2782,7 @@ async function fetchSourceTabGviz(tabName) {
   const json = JSON.parse(text.substring(47, text.length - 2));
   const numCols = json.table.cols.length;
   const cols = json.table.cols.map(c => String(c.label||""));
+  if (tabName.startsWith("Published ") && !cols.includes("Publication Status")) throw new Error("Cleared game data is not available yet.");
   const rows = (json.table.rows||[]).map(r => {
     const cells = [];
     for (let i = 0; i < numCols; i++) {
@@ -6834,6 +6842,7 @@ function scoreMatchupTeamBoxRows(data, matchId, team, normalize) {
   document.getElementById('score-matchup-close').addEventListener('click', () => matchup.close());
 
   async function readMatchupTable(sheet, tab) {
+    tab = publishedLogTab(tab);
     if (!sheet) throw new Error('No stats sheet configured for this season.');
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
@@ -6842,6 +6851,7 @@ function scoreMatchupTeamBoxRows(data, matchId, team, normalize) {
       const response = await fetch(url, { signal: controller.signal });
       if (!response.ok) throw new Error('Stats are temporarily unavailable.');
       const rows = parseCSV(await response.text());
+      if (tab.startsWith('Published ') && !(rows[0] || []).includes('Publication Status')) throw new Error('Cleared game data is not available yet.');
       return { cols: (rows.shift() || []).map(c => String(c).trim()), rows };
     } finally { clearTimeout(timer); }
   }
@@ -7017,6 +7027,7 @@ function scoreMatchupTeamBoxRows(data, matchId, team, normalize) {
     resizeTrack();
   }
   async function readLog(sheet, tab, optional = false) {
+    tab = publishedLogTab(tab);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
     try {
@@ -7026,7 +7037,7 @@ function scoreMatchupTeamBoxRows(data, matchId, team, normalize) {
       if (!response.ok) throw new Error(`Scores unavailable (${response.status})`);
       const rows = parseCSV(await response.text());
       const cols = (rows.shift() || []).map(value => String(value).trim());
-      if (!['Date', 'Team 1', 'Team 2', 'Team 1 Score', 'Team 2 Score'].every(col => cols.includes(col))) {
+      if (!['Date', 'Team 1', 'Team 2', 'Team 1 Score', 'Team 2 Score', 'Publication Status'].every(col => cols.includes(col))) {
         // Google can return the first worksheet when an optional tab does not exist.
         if (optional) return { cols: [], rows: [] };
         throw new Error('Game log columns are unavailable');
