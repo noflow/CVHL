@@ -57,7 +57,7 @@
     const verifier = base64(bytes);
     sessionStorage.setItem(verifierKey, verifier);
     const challenge = base64(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier))));
-    location.assign(`${service}/website/auth/${encodeURIComponent(league)}?challenge=${challenge}`);
+    location.assign(`${service}/website/auth/${encodeURIComponent(league)}?challenge=${challenge}&site=${encodeURIComponent(location.origin+location.pathname.replace(/\/?$/,'/'))}`);
   }
   async function exchange() {
     const params = new URLSearchParams(location.hash.split('?')[1] || '');
