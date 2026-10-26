@@ -1,0 +1,36 @@
+/* All colours come from the enclosing league website, including dark themes. */
+#player-centre {--pc-panel:var(--white,#fff);--pc-ink:var(--black,#111);--pc-muted:var(--grey3,#667);--pc-line:var(--grey2,#ccd);--pc-action:var(--teal,#154275);--pc-accent:var(--gold,#f39c12);color:var(--pc-ink);padding:8px 0 32px}
+#player-centre[data-dark="true"] {--pc-panel:var(--black,#101b2d);--pc-ink:var(--white,#f7faff);--pc-muted:var(--grey2,#b9cbe1);--pc-line:var(--grey3,#566980);--pc-action:var(--teal2,#153b65)}
+#player-centre .pc-head {display:flex;align-items:center;justify-content:space-between;gap:16px;margin:20px 0}
+#player-centre h2 {font:inherit;font-size:clamp(25px,4vw,36px);font-weight:800;color:inherit;margin:0 0 8px}
+#player-centre h3 {font:inherit;font-size:21px;font-weight:700;margin:0 0 16px;color:inherit}
+#player-centre p {line-height:1.6;margin:8px 0 16px;color:inherit}
+#player-centre .pc-muted {color:var(--pc-muted)}
+#player-centre .pc-card {background:var(--pc-panel);color:var(--pc-ink);border:1px solid var(--pc-line);border-top:3px solid var(--pc-accent);border-radius:8px;padding:24px;margin:18px 0;box-shadow:0 8px 24px #00000014}
+#player-centre .pc-columns {display:grid;grid-template-columns:1fr 1fr;gap:22px}
+#player-centre .pc-actions {display:flex;flex-wrap:wrap;gap:10px}
+#player-centre button {font:inherit;font-weight:700;border:1px solid var(--pc-accent);border-radius:5px;background:var(--pc-action);color:var(--white,#fff);padding:11px 18px;cursor:pointer;line-height:1.3}
+#player-centre button:hover {filter:brightness(1.2)}
+#player-centre button:disabled {opacity:.6;cursor:wait}
+#player-centre .pc-tabs {display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+#player-centre .pc-tabs button[aria-selected="true"] {box-shadow:inset 0 -3px 0 var(--pc-accent)}
+#player-centre form {display:grid;gap:16px}
+#player-centre label {display:grid;gap:8px;font-weight:600;color:inherit}
+#player-centre input,#player-centre select,#player-centre textarea {width:100%;font:inherit;padding:12px;border:1px solid var(--pc-line);border-radius:5px;color:var(--pc-ink);background:var(--pc-panel)}
+#player-centre textarea {resize:vertical;min-height:70px}
+#player-centre dl {display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+#player-centre dt {color:var(--pc-muted)}
+#player-centre dd {margin:0;font-weight:700}
+#player-centre .pc-pill {display:inline-flex;padding:6px 12px;border-radius:18px;border:1px solid var(--pc-line);font-size:14px;font-weight:700;gap:6px}
+#player-centre .pc-pill.available {border-color:var(--pc-accent);box-shadow:inset 3px 0 0 var(--pc-accent)}
+#player-centre .pc-pill.unavailable {border-color:var(--accent,#e32636);box-shadow:inset 3px 0 0 var(--accent,#e32636)}
+#player-centre .pc-totals {display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+#player-centre .pc-table {overflow:auto}
+#player-centre table {width:100%;border-collapse:collapse;background:transparent;color:inherit}
+#player-centre th,#player-centre td {background:transparent!important;color:inherit!important;border-bottom:1px solid var(--pc-line);padding:12px;text-align:left;white-space:normal}
+#player-centre tr,#player-centre tr:nth-child(even) {background:transparent!important}
+#player-centre small {display:block;color:var(--pc-muted);margin-top:4px}
+#player-centre summary {cursor:pointer;list-style-position:inside}
+#player-centre .pc-notice {padding:14px;border:1px solid var(--pc-accent);border-radius:5px;margin:16px 0;line-height:1.5}
+#player-centre [role="alert"] {border-color:var(--accent,#e32636)}
+@media(max-width:700px){#player-centre .pc-columns{grid-template-columns:1fr}#player-centre .pc-head{align-items:flex-start;flex-direction:column}#player-centre .pc-card{padding:18px}#player-centre .pc-table table{min-width:500px}}
