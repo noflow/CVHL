@@ -1773,6 +1773,8 @@
   .score-matchup-columns { grid-template-columns: 1fr; }
 }
 
+  nav .player-centre-nav {display:inline-flex;align-items:center;flex-shrink:0;padding:6px 14px;color:#fff;background:rgba(255,255,255,.12);border-radius:4px;text-decoration:none;font:inherit;font-weight:600;white-space:nowrap;}
+  nav .player-centre-nav:hover {background:rgba(255,255,255,.22);}
 </style>
 <style id="league-theme">
 /* CVHL: dark arena, electric blue, silver and Canadian red accents. */
@@ -1848,7 +1850,8 @@ footer { color: #b5c7dc; }
     <button onclick="showPage('schedule', this)">Schedule</button>
     <button id="bracket-nav-btn" onclick="showPage('bracket', this)">Playoff Bracket</button>
     <button onclick="showPage('games', this)">Recent Games</button>
-  </nav>
+      <a class="player-centre-nav" href="https://api-toolbox.onrender.com/public/continental-virtual-hockey-league/profile">My Profile / Availability</a>
+</nav>
   <a id="discord-nav-link" class="discord-nav-link" href="#" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord server" title="Join our Discord server">
     <img src="https://cdn.simpleicons.org/discord/ffffff" alt="">
   </a>
